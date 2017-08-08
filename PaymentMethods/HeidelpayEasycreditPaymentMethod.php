@@ -134,8 +134,7 @@ class HeidelpayEasycreditPaymentMethod extends HeidelpayAbstractPaymentMethod
             ->set('since', date('Y-m-d', strtotime($quote->getCustomer()->getCreatedAt())))
             ->set('ordercount', $this->orderCollectionFactory->create($quote->getCustomerId())->count());
 
-        $basketId = 1;
-        $this->_heidelpayPaymentMethod->getRequest()->getBasket()->set('id', $basketId);
+        $this->_heidelpayPaymentMethod->getRequest()->getBasket()->set('id', $this->submitQuoteToBasketApi($quote));
 
         // TODO: remove debug log
         $this->_logger->debug(
