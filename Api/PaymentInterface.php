@@ -29,11 +29,21 @@ interface PaymentInterface
      * Returns a json presentation of payment data, if information is available.
      * Else, it just returns null.
      *
-     * @param integer $quoteId
+     * @param int $quoteId
      * @param string $paymentMethod
      * @return string
      */
     public function getAdditionalPaymentInformation($quoteId, $paymentMethod);
+
+    /**
+     * Method for receiving easyCredit information during the checkout process,
+     * including agreements and redirect url for the gateway.
+     *
+     * @param string|int $quoteId
+     *
+     * @return string[]
+     */
+    public function getEasycreditInformation($quoteId);
 
     /**
      * Method for storing additional payment data for customers.
@@ -41,6 +51,7 @@ interface PaymentInterface
      * @param int $cartId
      * @param string $method The payment method code
      * @param string[] $additionalData
+     *
      * @return string
      */
     public function saveAdditionalPaymentInfo($cartId, $method, $additionalData);
@@ -51,6 +62,7 @@ interface PaymentInterface
      * @param string $cartId
      * @param string $method The payment method code
      * @param string[] $additionalData
+     *
      * @return string
      */
     public function saveGuestAdditionalPaymentInfo($cartId, $method, $additionalData);

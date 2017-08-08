@@ -134,6 +134,41 @@ class Payment implements PaymentInterface
     /**
      * @inheritdoc
      */
+    public function getEasycreditInformation($quoteId)
+    {
+        $quote = $this->quoteRepository->get($quoteId);
+
+        // if the quote is empty or null, it might be a guest cart id - so we look for it.
+        if ($quote === null || $quote->isEmpty()) {
+            // get the real quote id by guest cart id (masked random string serves as guest cart id)
+            /** @var \Magento\Quote\Model\QuoteIdMask $quoteIdMask */
+            $quoteIdMask = $this->quoteIdMaskFactory->create()->load($quoteId, 'masked_id');
+            $quote = $this->quoteRepository->get($quoteIdMask->getQuoteId());
+
+            if ($quote === null || $quote->isEmpty()) {
+                return json_encode(null);
+            }
+        }
+
+        /** @var \Heidelpay\Gateway\PaymentMethods\HeidelpayEasycreditPaymentMethod $easyCreditInstance */
+        $easyCreditInstance = $quote->getPayment()->getMethodInstance();
+
+        $response = $easyCreditInstance->getHeidelpayUrl($quote);
+
+        // if there is an error or a pending transaction, return nothing.
+        if ($response->isError() || $response->isPending()) {
+            return json_encode(null);
+        }
+
+        return json_encode([
+            'redirect_url' => $response->getPaymentFormUrl(),
+            'agreement_text' => $response->getConfig()->getOptinText()
+        ]);
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function saveAdditionalPaymentInfo($cartId, $method, $additionalData)
     {
         // get the quote information by cart id

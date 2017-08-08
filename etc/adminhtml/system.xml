@@ -458,6 +458,39 @@
                         <comment>Insert 0 to disable limit.</comment>
                     </field>
                 </group>
+                <group id="hgweasycredit" translate="label" type="text" sortOrder="200" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>HGWEASYCREDIT</label>
+                    <comment>
+                        <![CDATA[HGW_ABOUT_EASYCREDIT]]>
+                    </comment>
+                    <field id="active" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Enabled</label>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                        <config_path>payment/hgweasycredit/active</config_path>
+                    </field>
+                    <field id="title" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Title</label>
+                        <config_path>payment/hgweasycredit/title</config_path>
+                    </field>
+                    <field id="channel" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Channel</label>
+                        <config_path>payment/hgweasycredit/channel</config_path>
+                    </field>
+                    <field id="sort_order" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Sort Order</label>
+                        <config_path>payment/hgweasycredit/sort_order</config_path>
+                    </field>
+                    <field id="allowspecific" translate="label" type="allowspecific" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Payment from Applicable Countries</label>
+                        <source_model>Magento\Payment\Model\Config\Source\Allspecificcountries</source_model>
+                        <config_path>payment/hgweasycredit/allowspecific</config_path>
+                    </field>
+                    <field id="specificcountry" translate="label" type="multiselect" sortOrder="51" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Payment from Specific Countries</label>
+                        <source_model>Magento\Directory\Model\Config\Source\Country</source_model>
+                        <config_path>payment/hgweasycredit/specificcountry</config_path>
+                    </field>
+                </group>
             </group>
         </section>
     </system>

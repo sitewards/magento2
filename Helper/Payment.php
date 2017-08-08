@@ -5,6 +5,7 @@ namespace Heidelpay\Gateway\Helper;
 use Heidelpay\CustomerMessages\CustomerMessage;
 use Magento\Framework\HTTP\ZendClientFactory;
 use Magento\Payment\Model\Method\Logger;
+use Magento\Quote\Model\Quote;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Invoice;
 
@@ -29,34 +30,73 @@ class Payment extends \Magento\Framework\App\Helper\AbstractHelper
     protected $_invoiceOrderEmail = true;
     protected $_debug = false;
 
-    /** @var ZendClientFactory */
+    /**
+     * @var ZendClientFactory
+     */
     protected $httpClientFactory;
 
-    /** @var Logger */
+    /**
+     * @var Logger
+     */
     protected $log;
 
-    /** @var \Magento\Framework\DB\TransactionFactory */
+    /**
+     * @var \Magento\Framework\DB\TransactionFactory
+     */
     protected $transactionFactory;
 
-    /** @var \Magento\Framework\Locale\Resolver */
+    /**
+     * @var \Magento\Framework\Locale\Resolver
+     */
     protected $localeResolver;
+
+    /**
+     * @var \Magento\Store\Model\App\Emulation
+     */
+    protected $appEmulation;
+
+    /**
+     * @var \Magento\Catalog\Helper\ImageFactory
+     */
+    protected $imageHelperFactory;
+
+    /**
+     * @var
+     */
+    protected $basketRequestFactory;
+
+    /**
+     * @var
+     */
+    protected $basketItemFactory;
 
     /**
      * @param ZendClientFactory                        $httpClientFactory
      * @param Logger                                   $logger
      * @param \Magento\Framework\DB\TransactionFactory $transactionFactory
      * @param \Magento\Framework\Locale\Resolver       $localeResolver
+     * @param \Magento\Store\Model\App\Emulation       $appEmulation
+     * @param \Magento\Catalog\Helper\ImageFactory     $imageHelperFactory
      */
     public function __construct(
         ZendClientFactory $httpClientFactory,
         Logger $logger,
         \Magento\Framework\DB\TransactionFactory $transactionFactory,
-        \Magento\Framework\Locale\Resolver $localeResolver
+        \Magento\Framework\Locale\Resolver $localeResolver,
+        \Magento\Store\Model\App\Emulation $appEmulation,
+        \Magento\Catalog\Helper\ImageFactory $imageHelperFactory,
+        \Heidelpay\PhpBasketApi\RequestFactory $basketRequestFactory,
+        \Heidelpay\PhpBasketApi\Object\BasketItemFactory $basketItemFactory
     ) {
         $this->httpClientFactory = $httpClientFactory;
         $this->log = $logger;
         $this->transactionFactory = $transactionFactory;
         $this->localeResolver = $localeResolver;
+        $this->appEmulation = $appEmulation;
+        $this->imageHelperFactory = $imageHelperFactory;
+
+        $this->basketRequestFactory = $basketRequestFactory;
+        $this->basketItemFactory = $basketItemFactory;
     }
 
     public function splitPaymentCode($PAYMENT_CODE)
@@ -255,5 +295,66 @@ class Payment extends \Magento\Framework\App\Helper\AbstractHelper
         $transaction->addObject($invoice)
             ->addObject($invoice->getOrder())
             ->save();
+    }
+
+    /**
+     * Converts a Quote to a heidelpay PHP Basket Api Request instance.
+     *
+     * @param Quote $quote
+     *
+     * @return \Heidelpay\PhpBasketApi\Request|null
+     */
+    public function convertQuoteToBasket(Quote $quote)
+    {
+        // if no (valid) quote is supplied, we can't convert it to a heidelpay Basket object.
+        if ($quote === null || $quote->isEmpty()) {
+            return null;
+        }
+
+        // we emulate that we are in the frontend to get frontend product images.
+        $this->appEmulation->startEnvironmentEmulation(
+            $quote->getStoreId(),
+            \Magento\Framework\App\Area::AREA_FRONTEND,
+            true
+        );
+
+        // initialize the basket request
+        $basketRequest = $this->basketRequestFactory->create();
+
+        $basketRequest->getBasket()
+            ->setCurrencyCode($quote->getQuoteCurrencyCode())
+            ->setAmountTotalNet((int) ($quote->getGrandTotal() * 100))
+            ->setAmountTotalVat((int) ($quote->getShippingAddress()->getTaxAmount() * 100))
+            ->setAmountTotalDiscount((int) ($quote->getShippingAddress()->getDiscountAmount() * 100))
+            ->setBasketReferenceId(sprintf('M2-S%dQ%d-%s', $quote->getStoreId(), $quote->getId(), date('YmdHis')));
+
+        /** @var \Magento\Quote\Model\Quote\Item $item */
+        foreach ($quote->getAllVisibleItems() as $item) {
+            $basketItem = $this->basketItemFactory->create();
+
+            $basketItem->setQuantity($item->getQty())
+                ->setVat((int) ($item->getTaxPercent() * 100))
+                ->setAmountPerUnit((int) ($item->getPrice() * 100))
+                ->setAmountVat((int) ($item->getTaxAmount() * 100))
+                ->setAmountNet((int) ($item->getRowTotal() * 100))
+                ->setAmountGross((int) ($item->getRowTotalInclTax() * 100))
+                ->setAmountDiscount((int) ($item->getDiscountAmount() * 100))
+                ->setTitle($item->getName())
+                ->setDescription($item->getDescription())
+                ->setArticleId($item->getSku())
+                ->setImageUrl(
+                    $this->imageHelperFactory->create()->init($item->getProduct(), 'category_page_list')->getUrl()
+                )
+                ->setBasketItemReferenceId(
+                    sprintf('M2-S%dQ%d-%s-x%d', $quote->getStoreId(), $quote->getId(), $item->getSku(), $item->getQty())
+                );
+
+            $basketRequest->getBasket()->addBasketItem($basketItem);
+        }
+
+        // stop the frontend environment emulation
+        $this->appEmulation->stopEnvironmentEmulation();
+
+        return $basketRequest;
     }
 }

@@ -6,6 +6,7 @@ use Heidelpay\Gateway\Model\Config\Source\BookingMode;
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
 use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as HeidelpayTransactionCollectionFactory;
 use Heidelpay\PhpApi\Response;
+use Magento\Quote\Model\Quote;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\Order\Payment\Transaction;
@@ -742,6 +743,32 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
         }
 
         $order->getPayment()->addTransaction(Transaction::TYPE_CAPTURE, null, true);
+    }
+
+    public function submitQuoteToBasketApi(Quote $quote = null)
+    {
+        if ($quote === null || $quote->isEmpty()) {
+            return null;
+        }
+
+        $config = $this->getMainConfig($this->getCode(), $quote->getStoreId());
+
+        $basketApiRequest = $this->_paymentHelper->convertQuoteToBasket($quote);
+        $basketApiRequest->setAuthentication($config['USER.LOGIN'], $config['USER.PWD'], $config['SECURITY.SENDER']);
+
+        // add a new basket via api request
+        $basketApiResponse = $basketApiRequest->addNewBasket();
+
+        // if the request wasn't successful, log the error message(s) and return null, because we got no BasketId.
+        if ($basketApiResponse->isFailure()) {
+            $this->_logger->warning($basketApiResponse->printMessage());
+            return null;
+        }
+
+        // TODO: remove debug log
+        $this->_logger->debug($basketApiResponse->printMessage() . ' Response: ' . $basketApiResponse->toJson());
+
+        return $basketApiResponse->getBasketId();
     }
 
     /**
