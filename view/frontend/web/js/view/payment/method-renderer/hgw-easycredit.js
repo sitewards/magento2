@@ -78,8 +78,7 @@ define(
                     function () {
                         serviceUrl = urlBuilder.createUrl('/hgw/get-easycredit-info', {});
                         var hgwPayload = {
-                            quoteId: quote.getQuoteId(),
-                            email: quote.guestEmail
+                            quoteId: quote.getQuoteId()
                         };
 
                         storage.post(
@@ -103,7 +102,7 @@ define(
             },
 
             getCode: function () {
-                return 'hgweasy';
+                return 'hgweasycredit';
             },
 
             getData: function () {
