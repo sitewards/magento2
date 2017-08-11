@@ -675,7 +675,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
         if ($order->canCancel()) {
             $order->cancel()
                 ->setState(Order::STATE_CANCELED)
-                ->addStatusHistoryComment('heidelpay - ' . $message, Order::STATE_CANCELED)
+                ->addStatusHistoryComment($message, Order::STATE_CANCELED)
                 ->setIsCustomerNotified(false);
         }
     }
@@ -693,19 +693,19 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
         $order->getPayment()->addTransaction(Transaction::TYPE_AUTH, null, true);
 
         $order->setState(Order::STATE_PENDING_PAYMENT)
-            ->addStatusHistoryComment('heidelpay - ' . $message, Order::STATE_PENDING_PAYMENT)
+            ->addStatusHistoryComment($message, Order::STATE_PENDING_PAYMENT)
             ->setIsCustomerNotified(true);
     }
 
     /**
+     * Order processing for processing heidelpay transactions
      *
      * @param array                      $data
      * @param \Magento\Sales\Model\Order $order
+     * @param string|null                $message
      */
-    public function processingTransactionProcessing($data, &$order)
+    public function processingTransactionProcessing($data, &$order, $message = null)
     {
-        $message = __('ShortId : %1', $data['IDENTIFICATION_SHORTID']);
-
         $order->getPayment()
             ->setTransactionId($data['IDENTIFICATION_UNIQUEID'])
             ->setParentTransactionId($order->getPayment()->getLastTransId())
@@ -716,7 +716,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
             && $this->_paymentHelper->isMatchingCurrency($order, $data)
         ) {
             $order->setState(Order::STATE_PROCESSING)
-                ->addStatusHistoryComment('heidelpay - ' . $message, Order::STATE_PROCESSING)
+                ->addStatusHistoryComment($message, Order::STATE_PROCESSING)
                 ->setIsCustomerNotified(true);
         } else {
             // in case rc is ack and amount is to low/heigh or curreny missmatch
@@ -726,7 +726,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
             );
 
             $order->setState(Order::STATE_PAYMENT_REVIEW)
-                ->addStatusHistoryComment('heidelpay - ' . $message, Order::STATE_PAYMENT_REVIEW)
+                ->addStatusHistoryComment($message, Order::STATE_PAYMENT_REVIEW)
                 ->setIsCustomerNotified(true);
         }
 

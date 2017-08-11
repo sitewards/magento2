@@ -113,7 +113,11 @@ class Payment extends \Magento\Framework\App\Helper\AbstractHelper
     {
         $paymentCode = $this->splitPaymentCode($data['PAYMENT_CODE']);
 
-        $message = (!empty($message)) ? $message : $data['PROCESSING_RETURN'];
+        $message = (!empty($message))
+            ? $message
+            : 'Short-ID: ' . $data['IDENTIFICATION_SHORTID'] . ' (' . $data['PROCESSING_RETURN'] . ')';
+
+        $message = __('heidelpay - ' . $message);
 
         $quoteID = ($order->getLastQuoteId() === false)
             ? $order->getQuoteId()
@@ -131,7 +135,7 @@ class Payment extends \Magento\Framework\App\Helper\AbstractHelper
         if ($data['PROCESSING_RESULT'] == 'NOK') {
             $order->getPayment()->getMethodInstance()->cancelledTransactionProcessing($order, $message);
         } elseif ($this->isProcessing($paymentCode[1], $data)) {
-            $order->getPayment()->getMethodInstance()->processingTransactionProcessing($data, $order);
+            $order->getPayment()->getMethodInstance()->processingTransactionProcessing($data, $order, $message);
         } else {
             $order->getPayment()->getMethodInstance()->pendingTransactionProcessing($data, $order, $message);
         }
