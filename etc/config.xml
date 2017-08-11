@@ -120,6 +120,17 @@
                 <max_order_total>0</max_order_total>
                 <model>Heidelpay\Gateway\PaymentMethods\HeidelpayInvoiceSecuredPaymentMethod</model>
             </hgwivs>
+            <hgweasycredit>
+                <active>0</active>
+                <payment_action>authorize</payment_action>
+                <title><![CDATA[ratenkauf by easyCredit]]></title>
+                <channel>DUMMY</channel>
+                <allowspecific>0</allowspecific>
+                <specificcountry>DE</specificcountry>
+                <min_order_total>200</min_order_total>
+                <max_order_total>3000</max_order_total>
+                <model>Heidelpay\Gateway\PaymentMethods\HeidelpayEasycreditPaymentMethod</model>
+            </hgweasycredit>
         </payment>
     </default>
 </config>
