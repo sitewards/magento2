@@ -61,16 +61,6 @@ class Payment extends \Magento\Framework\App\Helper\AbstractHelper
     protected $imageHelperFactory;
 
     /**
-     * @var
-     */
-    protected $basketRequestFactory;
-
-    /**
-     * @var
-     */
-    protected $basketItemFactory;
-
-    /**
      * @param ZendClientFactory                        $httpClientFactory
      * @param Logger                                   $logger
      * @param \Magento\Framework\DB\TransactionFactory $transactionFactory
@@ -84,9 +74,7 @@ class Payment extends \Magento\Framework\App\Helper\AbstractHelper
         \Magento\Framework\DB\TransactionFactory $transactionFactory,
         \Magento\Framework\Locale\Resolver $localeResolver,
         \Magento\Store\Model\App\Emulation $appEmulation,
-        \Magento\Catalog\Helper\ImageFactory $imageHelperFactory,
-        \Heidelpay\PhpBasketApi\RequestFactory $basketRequestFactory,
-        \Heidelpay\PhpBasketApi\Object\BasketItemFactory $basketItemFactory
+        \Magento\Catalog\Helper\ImageFactory $imageHelperFactory
     ) {
         $this->httpClientFactory = $httpClientFactory;
         $this->log = $logger;
@@ -94,9 +82,6 @@ class Payment extends \Magento\Framework\App\Helper\AbstractHelper
         $this->localeResolver = $localeResolver;
         $this->appEmulation = $appEmulation;
         $this->imageHelperFactory = $imageHelperFactory;
-
-        $this->basketRequestFactory = $basketRequestFactory;
-        $this->basketItemFactory = $basketItemFactory;
     }
 
     public function splitPaymentCode($PAYMENT_CODE)
@@ -323,7 +308,7 @@ class Payment extends \Magento\Framework\App\Helper\AbstractHelper
         );
 
         // initialize the basket request
-        $basketRequest = $this->basketRequestFactory->create();
+        $basketRequest = new \Heidelpay\PhpBasketApi\Request();
 
         $basketRequest->getBasket()
             ->setCurrencyCode($quote->getQuoteCurrencyCode())
@@ -334,7 +319,7 @@ class Payment extends \Magento\Framework\App\Helper\AbstractHelper
 
         /** @var \Magento\Quote\Model\Quote\Item $item */
         foreach ($quote->getAllVisibleItems() as $item) {
-            $basketItem = $this->basketItemFactory->create();
+            $basketItem = new \Heidelpay\PhpBasketApi\Object\BasketItem();
 
             $basketItem->setQuantity($item->getQty())
                 ->setVat((int) ($item->getTaxPercent() * 100))
