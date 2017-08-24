@@ -9,12 +9,6 @@
             <argument name="stateCommand" xsi:type="object">Heidelpay\Gateway\Model\Order\Payment\State\CaptureCommand</argument>
         </arguments>
     </type>
-    <type name="Heidelpay\PhpBasketApi\Request">
-        <arguments>
-            <argument name="auth" xsi:type="null" />
-            <argument name="basket" xsi:type="null" />
-        </arguments>
-    </type>
     <type name="Magento\Shipping\Controller\Adminhtml\Order\Shipment\Save">
         <plugin name="HeidelpayGatewayShipmentSaveController" type="Heidelpay\Gateway\Controller\Adminhtml\Order\Shipment\Save" sortOrder="1"/>
     </type>

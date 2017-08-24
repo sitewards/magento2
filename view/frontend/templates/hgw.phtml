@@ -1,40 +1,33 @@
 <?php
 /**
- * Template file for credit and debit card payment 
+ * Template file for credit and debit card payment
  *
  * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
  * @copyright Copyright © 2016-present Heidelberger Payment GmbH. All rights reserved.
- * @link  https://dev.heidelpay.de/magento
- * @author  Jens Richter
  *
- * @package  Heidelpay
+ * @link  https://dev.heidelpay.de/magento
+ *
+ * @author Jens Richter
+ *
+ * @package Heidelpay
  * @subpackage Magento2
  * @category Magento2
- * @var $block  \Heidelpay\Gateway\Block\Hgw 
+ *
+ * @var $block \Heidelpay\Gateway\Block\Hgw
  */
 ?>
+<div style="text-align: center;">
+    <iframe id="payment_iframe" data-container="hgw-iframe"
+            scrolling="no" frameborder="0" border="0"
+            src="<?php echo trim($block->getHgwUrl()) ?>"
+            class="iframe"
+            style="height:200px;background-color:transparent"
+    >
+    </iframe>
 
-<center>
-		<iframe id="payment_iframe" data-container="hgw-iframe" 
-				scrolling="no" frameborder="0" border="0" 
-				src="<?php echo trim($block->getHgwUrl()) ?>" 
-				class="iframe"
-				style="height:200px;background-color:transparent">
-				
-		</iframe>
+    <br /><br />
 
-			<br /><br />
-			<button  id="pay-now"   type="submit" style="margin-left:200px"
-                        >
-                    <span><?php echo __('pay now') ?></span>
-          </button>
-</center>
-
-<script type="text/x-magento-init">
-    {
-        "#pay-now": {
-            "Heidelpay_Gateway/js/heidelpayCcAfter": { }
-         }
-            
-    }
-</script>
+    <button id="pay-now" style="margin-left:200px" data-mage-init='{"Heidelpay_Gateway/js/heidelpayCcAfter": {}}'>
+        <span><?php echo __('pay now') ?></span>
+    </button>
+</div>
