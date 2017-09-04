@@ -115,8 +115,8 @@ define(
             },
 
             /**
-             * Redirect to hgw controller
-             * Override magento placepayment function
+             * Redirect to easyCredit financing plan
+             * Overrides placeOrder
              */
             placeOrder: function (data, event) {
                 var self = this,
@@ -127,8 +127,8 @@ define(
                 }
 
                 if (this.validate() && additionalValidators.validate()) {
-                    var test = '';
-                    return true;
+                    //window.location.replace(url.build('hgw/'));
+                    console.log(this.hgwEasyCreditInfo());
                 }
 
                 return false;

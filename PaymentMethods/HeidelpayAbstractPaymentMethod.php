@@ -745,6 +745,14 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
         $order->getPayment()->addTransaction(Transaction::TYPE_CAPTURE, null, true);
     }
 
+    /**
+     * Converts a Quote to a heidelpay basket
+     * and submits it to the payment API.
+     *
+     * @param Quote|null $quote
+     *
+     * @return null|string
+     */
     public function submitQuoteToBasketApi(Quote $quote = null)
     {
         if ($quote === null || $quote->isEmpty()) {
@@ -753,6 +761,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
 
         $config = $this->getMainConfig($this->getCode(), $quote->getStoreId());
 
+        // create new instance of a basketApi Request, convert the quote to a basket
         $basketApiRequest = $this->_paymentHelper->convertQuoteToBasket($quote);
         $basketApiRequest->setAuthentication($config['USER.LOGIN'], $config['USER.PWD'], $config['SECURITY.SENDER']);
 

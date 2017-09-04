@@ -23,9 +23,9 @@
                 <div class="hgw-easyCredit-information">
                     <div class="head">
                         <img src="https://static.easycredit.de/content/image/logo/ratenkauf_42_55.png" alt="ratenkauf by easyCredit Logo" />
-                        <span style="font-weight: bold;">Was ist ratenkauf by easyCredit?</span>
+                        <span style="font-weight: bold;"><!-- ko i18n: 'What is ratenkauf by easyCredit?'--><!-- /ko --></span>
                     </div>
-                    <p>Datenübermittlung ratenkauf by easyCredit</p>
+                    <p><!-- ko i18n: 'Data transmission for ratenkauf by easyCredit'--><!-- /ko --></p>
                 </div>
                 <div class="field required">
                     <div class="control">
@@ -52,12 +52,12 @@
         <div class="actions-toolbar" id="review-buttons-container">
             <div class="primary">
                 <button class="action primary checkout"
-                        type="submit"
                         data-bind="
-                        click: placeOrder,
-                        attr: {title: $t('Place Order')},
-                        enable: (getCode() == isChecked()),
-                        css: {disabled: !isPlaceOrderActionAllowed()}
+                            click: placeOrder,
+                            attr: {title: $t('Place Order')},
+                            enable: (getCode() == isChecked()),
+                            css: {disabled: !isPlaceOrderActionAllowed()},
+                            disabled: !hgwEasyCreditChecked()
                         "
                         data-role="review-save">
                     <span data-bind="i18n: 'Place Order'"></span>
